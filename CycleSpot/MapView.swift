@@ -21,6 +21,8 @@ struct MapView: View {
     @State private var searchText: String = ""
     
     private let locationManager = CLLocationManager()
+    private let logger = Logger(subsystem: "com.cyclespot", category: "MapView")
+
     var body: some View {
         Map(position: $cameraPosition) {
             UserAnnotation()
@@ -39,15 +41,20 @@ struct MapView: View {
         .overlay(alignment: .top) {
             VStack {
                 HStack {
-                    Image(systemName: "magnigyingglass")
+                    Image(systemName: "magnifyingglass")
                         .foregroundStyle(.gray)
                         .padding(.leading, 12)
-                    TextField("Search for locations...", text: $searchText)
-                        .textFieldStyle(.plain)
-                        .padding(.vertical, 12)
+                    TextField("Search for locations...", text: $searchText, onCommit: {
+                        performSearch()
+                    }))
+                    .textFieldStyle(.plain)
+                    .padding(.vertical, 12)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalizati
                     if !searchText.isEmpty {
                         Button(action: {
                             searchText = ""
+                            racks.removeAll()
                         }) {
                             Image(systemName: "xmark.circle.fill")
                                 .foregroundStyle(.gray)
@@ -89,6 +96,48 @@ struct MapView: View {
         .onAppear {
             // This should grab the users current location?
             locationManager.requestWhenInUseAuthorization()
+        }
+    }
+    private func performSearch() {
+            guard !searchText.isEmpty else { return }
+            
+            let request = MKLocalSearch.Request()
+            request.naturalLanguageQuery = searchText
+            request.region = MKCoordinateRegion(.world) // you can limit region later if you want
+
+            let search = MKLocalSearch(request: request)
+            search.start { response, error in
+                if let error = error {
+                    logger.error("Search error: \(error.localizedDescription)")
+                    return
+                }
+                
+                if let items = response?.mapItems {
+                    racks = items
+                    if let first = items.first {
+                        cameraPosition = .region(MKCoordinateRegion(center: first.placemark.coordinate,
+                                                                    span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)))
+                    }
+                }
+            }
+    }
+        
+    private func getDirections(to destination: MKMapItem) {
+        let request = MKDirections.Request()
+        request.source = MKMapItem.forCurrentLocation()
+        request.destination = destination
+        request.transportType = .walking
+            
+        let directions = MKDirections(request: request)
+        directions.calculate { response, error in
+            if let error = error {
+                logger.error("Error calculating directions: \(error.localizedDescription)")
+                return
+            }
+                
+            if let route = response?.routes.first {
+                mapRoute = route
+            }
         }
     }
 }
