@@ -46,11 +46,11 @@ struct MapView: View {
                         .padding(.leading, 12)
                     TextField("Search for locations...", text: $searchText, onCommit: {
                         performSearch()
-                    }))
+                    })
                     .textFieldStyle(.plain)
                     .padding(.vertical, 12)
                     .autocorrectionDisabled()
-                    .textInputAutocapitalizati
+                    .textInputAutocapitalization(.never)
                     if !searchText.isEmpty {
                         Button(action: {
                             searchText = ""
@@ -96,6 +96,8 @@ struct MapView: View {
         .onAppear {
             // This should grab the users current location?
             locationManager.requestWhenInUseAuthorization()
+            cameraPosition = .userLocation(fallback: .automatic)
+            
         }
     }
     private func performSearch() {
@@ -115,8 +117,7 @@ struct MapView: View {
                 if let items = response?.mapItems {
                     racks = items
                     if let first = items.first {
-                        cameraPosition = .region(MKCoordinateRegion(center: first.placemark.coordinate,
-                                                                    span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)))
+                        cameraPosition = .userLocation(fallback: .region(MKCoordinateRegion(center: first.placemark.coordinate, span: MKCoordinateSpan(latitudeDelta: 44.475695, longitudeDelta: -122.406417))))
                     }
                 }
             }
