@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -37,21 +37,9 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		DEC3F5B02EA02F20001F6509 /* CycleSpot */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CycleSpot;
-			sourceTree = "<group>";
-		};
-		DEC3F5BE2EA02F22001F6509 /* CycleSpotTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CycleSpotTests;
-			sourceTree = "<group>";
-		};
-		DEC3F5C82EA02F22001F6509 /* CycleSpotUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CycleSpotUITests;
-			sourceTree = "<group>";
-		};
+		DEC3F5B02EA02F20001F6509 /* CycleSpot */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = CycleSpot; sourceTree = "<group>"; };
+		DEC3F5BE2EA02F22001F6509 /* CycleSpotTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = CycleSpotTests; sourceTree = "<group>"; };
+		DEC3F5C82EA02F22001F6509 /* CycleSpotUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = CycleSpotUITests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -209,6 +197,7 @@
 				};
 			};
 			buildConfigurationList = DEC3F5A92EA02F20001F6509 /* Build configuration list for PBXProject "CycleSpot" */;
+			compatibilityVersion = "Xcode 15.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -220,7 +209,6 @@
 			packageReferences = (
 				DE143AF52EAC14F900FC423C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
-			preferredProjectObjectVersion = 77;
 			productRefGroup = DEC3F5AF2EA02F20001F6509 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -355,7 +343,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -412,7 +400,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
