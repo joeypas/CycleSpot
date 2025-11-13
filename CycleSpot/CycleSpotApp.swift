@@ -17,6 +17,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
 
     FirebaseApp.configure()
+      print("✅ Firebase configured successfully")
 
     return true
 
@@ -34,3 +35,4 @@ struct CycleSpotApp: App {
         }
     }
 }
+

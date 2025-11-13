@@ -1,11 +1,5 @@
-//
-//  ContentView.swift
-//  CycleSpot
-//
-//  Created by Joseph Liotta on 10/15/25.
-//
-
 import SwiftUI
+import FirebaseFirestore
 
 struct ContentView: View {
     var body: some View {

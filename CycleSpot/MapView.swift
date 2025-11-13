@@ -19,26 +19,29 @@ struct MapView: View {
     // Route, Null if we aren't using it
     @State private var mapRoute: MKRoute?
     @State private var searchText: String = ""
+    @StateObject private var rackView = BikeRackView()
     
     private let locationManager = CLLocationManager()
     private let logger = Logger(subsystem: "com.cyclespot", category: "MapView")
-
+    
     var body: some View {
-        Map(position: $cameraPosition) {
-            UserAnnotation()
-            ForEach(racks, id: \.self) { item in
-                // Create a marker for each rack
-                Marker(item: item)
-                    .mapItemDetailSelectionAccessory(.callout)
+        ZStack {
+            Map(position: $cameraPosition) {
+                UserAnnotation()
+                ForEach(rackView.racks) { rack in
+                    // Create a marker for each rack
+                    Marker(rack.address, coordinate: rack.coordinate)
+                        .tint(Color.blue)
+                }
+                if let mapRoute {
+                    // If we have a route display it
+                    MapPolyline(mapRoute)
+                        .stroke(Color.blue, lineWidth: 5)
+                }
             }
-            if let mapRoute {
-                // If we have a route display it
-                MapPolyline(mapRoute)
-                    .stroke(Color.blue, lineWidth: 5)
-            }
-        }
-        .contentMargins(20)
-        .overlay(alignment: .top) {
+            .contentMargins(20)
+            .edgesIgnoringSafeArea(.all)
+            
             VStack {
                 HStack {
                     Image(systemName: "magnifyingglass")
@@ -67,8 +70,13 @@ struct MapView: View {
                 .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 2)
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
+                Spacer()
             }
+            
         }
+        
+        
+        
         // Callback for when an item is selected
         .onChange(of: selectedItem) {
             if let selectedItem {
@@ -94,48 +102,49 @@ struct MapView: View {
             }
         }
         .onAppear {
-            // This should grab the users current location?
             locationManager.requestWhenInUseAuthorization()
             cameraPosition = .userLocation(fallback: .automatic)
-            
+            rackView.fetchRacks()
         }
     }
+    
+    
     private func performSearch() {
-            guard !searchText.isEmpty else { return }
+        guard !searchText.isEmpty else { return }
+        
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = searchText
+        request.region = MKCoordinateRegion(.world) // you can limit region later if you want
+        
+        let search = MKLocalSearch(request: request)
+        search.start { response, error in
+            if let error = error {
+                logger.error("Search error: \(error.localizedDescription)")
+                return
+            }
             
-            let request = MKLocalSearch.Request()
-            request.naturalLanguageQuery = searchText
-            request.region = MKCoordinateRegion(.world) // you can limit region later if you want
-
-            let search = MKLocalSearch(request: request)
-            search.start { response, error in
-                if let error = error {
-                    logger.error("Search error: \(error.localizedDescription)")
-                    return
-                }
-                
-                if let items = response?.mapItems {
-                    racks = items
-                    if let first = items.first {
-                        cameraPosition = .userLocation(fallback: .region(MKCoordinateRegion(center: first.placemark.coordinate, span: MKCoordinateSpan(latitudeDelta: 44.475695, longitudeDelta: -122.406417))))
-                    }
+            if let items = response?.mapItems {
+                racks = items
+                if let first = items.first {
+                    cameraPosition = .userLocation(fallback: .region(MKCoordinateRegion(center: first.placemark.coordinate, span: MKCoordinateSpan(latitudeDelta: 44.475695, longitudeDelta: -122.406417))))
                 }
             }
+        }
     }
-        
+    
     private func getDirections(to destination: MKMapItem) {
         let request = MKDirections.Request()
         request.source = MKMapItem.forCurrentLocation()
         request.destination = destination
         request.transportType = .walking
-            
+        
         let directions = MKDirections(request: request)
         directions.calculate { response, error in
             if let error = error {
                 logger.error("Error calculating directions: \(error.localizedDescription)")
                 return
             }
-                
+            
             if let route = response?.routes.first {
                 mapRoute = route
             }
