@@ -102,7 +102,7 @@ struct SettingsView: View {
                     // Old Sign Out removed (now inside AppSettingsScreen)
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle("Profile")
         }
     }
 
