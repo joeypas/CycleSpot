@@ -36,7 +36,7 @@ params = {
 }
 
 # UVM bikes data
-# https://services1.arcgis.com/1bO0c7PxQdsGidPK/ArcGIS/rest/services/UVM_Bicycle_Parking/FeatureServer/0/query
+uvm_rack_url = "https://services1.arcgis.com/1bO0c7PxQdsGidPK/ArcGIS/rest/services/UVM_Bicycle_Parking/FeatureServer/0/query"
 
 # Turn the json data we recieve into a dict with only the fields that we want
 def extract_fields(feature):
@@ -82,6 +82,5 @@ def update_racks(_: scheduler_fn.ScheduledEvent) -> None:
         # We got an error, so log it and fail
         logging.error("Update Racks failed: {}".format(e.__str__()))
         raise(e)
-
 
 

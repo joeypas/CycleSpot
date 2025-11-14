@@ -1,17 +1,17 @@
 //
-
 //  SettingsView.swift
 //  CycleSpot
 //
 //  Created by Joseph Liotta on 10/15/25.
 //
 
-
-
 import SwiftUI
+import PhotosUI
+
 struct SettingsView: View {
 
-    @State private var showingProfileOptions = false
+    @State private var selectedPhoto: PhotosPickerItem?
+    @State private var profileImage: Image? = nil
     @State private var notificationsEnabled = true
 
     var body: some View {
@@ -19,56 +19,53 @@ struct SettingsView: View {
             ScrollView {
                 VStack(spacing: 24) {
 
-                    // Profile
+                    // Profile Section
                     VStack(spacing: 12) {
-                        Image("profile_placeholder") // Replace with your image later
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 100, height: 100)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.gray.opacity(0.3), lineWidth: 1))
-                            .shadow(radius: 3)
-                            .padding(.top, 20)
+
+                        // Profile Image (placeholder or picked)
+                        if let profileImage = profileImage {
+                            profileImage
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 100, height: 100)
+                                .clipShape(Circle())
+                                .shadow(radius: 3)
+                                .padding(.top, 20)
+                        } else {
+                            Image("profile_placeholder")
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 100, height: 100)
+                                .clipShape(Circle())
+                                .shadow(radius: 3)
+                                .padding(.top, 20)
+                        }
 
                         Text("Username1")
                             .font(.title2)
                             .fontWeight(.semibold)
 
-                        Button(action: {
-                            showingProfileOptions.toggle()
-                        }) {
-
+                        // Photo Picker Button
+                        PhotosPicker(
+                            selection: $selectedPhoto,
+                            matching: .images
+                        ) {
                             Text("Change Profile Pic")
                                 .font(.subheadline)
                                 .foregroundColor(.blue)
-
                         }
-
-                        .sheet(isPresented: $showingProfileOptions) {
-
-                            VStack {
-                                Text("Profile Change Options")
-
-                                    .font(.headline)
-                                Spacer()
-                                Button("Close") {
-                                    showingProfileOptions = false
-                                }
-                                .padding()
-                            }
-                            .presentationDetents([.medium])
+                        .onChange(of: selectedPhoto) { newItem in
+                            loadImage(item: newItem)
                         }
                     }
-                
+
                     Divider()
-                    
-                    // Badges
-                    
+
+                    // Badges Section
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Badges")
                             .font(.headline)
 
-                    
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 16) {
                                 ForEach(fakeBadges, id: \.self) { badge in
@@ -77,16 +74,11 @@ struct SettingsView: View {
                                             .font(.largeTitle)
                                             .foregroundStyle(badge.color)
                                             .padding()
-                                            //.background(Color(.systemGray6))
-                                            .clipShape(Circle())
-                                        
+
                                         Text(badge.name)
                                             .font(.caption)
-
                                     }
-
                                 }
-
                             }
                             .padding(.horizontal)
                         }
@@ -94,65 +86,102 @@ struct SettingsView: View {
 
                     Divider()
 
-                    // App Settings
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("App Settings")
-                            .font(.headline)
-
-                        Toggle("Enable Notifications", isOn: $notificationsEnabled)
-                        
-
-                        NavigationLink(destination: Text("Privacy Settings (Coming Soon)")) {
-                            HStack {
-                                Label("Privacy", systemImage: "lock")
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.gray)
-                            }
+                    // --- NEW: App Settings Row ---
+                    NavigationLink(destination: AppSettingsScreen(notificationsEnabled: $notificationsEnabled)) {
+                        HStack {
+                            Label("App Settings", systemImage: "gearshape")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.gray)
                         }
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
 
                     Divider()
-                    
-                    // Sign out button
-                    Button(action: {
-                        // *Sign out logic will go here*
 
-                    }) {
-
-                        Text("Sign Out")
-                            .font(.headline)
-                            .foregroundColor(.red)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.red.opacity(0.1))
-                            .cornerRadius(12)
-
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom, 40)
+                    // Old Sign Out removed (now inside AppSettingsScreen)
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle("Profile")
+        }
+    }
+
+    // Load PhotosPicker image
+    func loadImage(item: PhotosPickerItem?) {
+        guard let item = item else { return }
+
+        Task {
+            if let data = try? await item.loadTransferable(type: Data.self),
+               let uiImage = UIImage(data: data) {
+                profileImage = Image(uiImage: uiImage)
+            }
         }
     }
 }
 
+//
+// Badge Model
+//
 
-// Badge Examples
 struct Badge: Hashable {
     let name: String
     let icon: String
     let color: Color
-
 }
 
 let fakeBadges: [Badge] = [
     Badge(name: "Explorer", icon: "bicycle", color: .blue),
     Badge(name: "Speedster", icon: "flame", color: .orange),
     Badge(name: "Early Bird", icon: "sunrise", color: .yellow),
-    Badge(name: "Night Rider", icon: "moon.stars", color: .purple)]
+    Badge(name: "Night Rider", icon: "moon.stars", color: .purple)
+]
+
+//
+// --- NEW: App Settings Screen ---
+//
+
+struct AppSettingsScreen: View {
+    @Binding var notificationsEnabled: Bool
+
+    var body: some View {
+        VStack(spacing: 32) {
+
+            // Notifications Toggle
+            Toggle("Enable Notifications", isOn: $notificationsEnabled)
+                .padding(.horizontal)
+
+            // Privacy Row (same style)
+            NavigationLink(destination: Text("Privacy Settings (Coming Soon)")) {
+                HStack {
+                    Label("Privacy", systemImage: "lock")
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.gray)
+                }
+                .padding(.horizontal)
+            }
+
+            Spacer()
+
+            // Sign Out Button
+            Button(role: .destructive) {
+                // sign out logic here
+            } label: {
+                Text("Sign Out")
+                    .font(.headline)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.red.opacity(0.1))
+                    .cornerRadius(12)
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 20)
+
+        }
+        .navigationTitle("App Settings")
+        .padding(.top)
+    }
+}
 
 #Preview {
     SettingsView()
