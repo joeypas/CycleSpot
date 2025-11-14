@@ -6,13 +6,14 @@
 //
 
 import SwiftUI
+
 struct Friend: Identifiable, Hashable {
     let id = UUID()
     let name: String
 }
 
 struct FriendsView: View {
-    // Preloaded friends
+    
     private let friends: [Friend] = [
         Friend(name: "Owen Romeo"),
         Friend(name: "Joe Liotta"),
@@ -23,7 +24,12 @@ struct FriendsView: View {
     var body: some View {
         NavigationStack {
             List(friends) { friend in
-                Label(friend.name, systemImage: "person.circle")
+                NavigationLink(value: friend) {
+                    Label(friend.name, systemImage: "person.circle")
+                }
+            }
+            .navigationDestination(for: Friend.self) { friend in
+                FriendProfileView(friend: friend)
             }
             .navigationTitle("Friends")
         }
@@ -31,5 +37,5 @@ struct FriendsView: View {
 }
 
 #Preview {
-    ContentView()
+    FriendsView()
 }
