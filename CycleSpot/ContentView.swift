@@ -2,17 +2,23 @@ import SwiftUI
 import FirebaseFirestore
 
 struct ContentView: View {
+    @StateObject private var rackView = BikeRackView()
     var body: some View {
         TabView {
-            Tab("Map", systemImage: "map") {
-                MapView()
-            }
-            Tab("Friends", systemImage: "person") {
-                FriendsView()
-            }
-            Tab("Settings", systemImage: "gear") {
-                SettingsView()
-            }
+            MapTabView()
+                .tabItem {
+                    Label("Map", systemImage: "map")
+                }
+                    
+            FriendsView()
+                .tabItem {
+                    Label("Friends", systemImage: "person")
+                }
+                    
+            SettingsView()
+                .tabItem {
+                    Label("Settings", systemImage: "gear")
+                }
         }
     }
 }

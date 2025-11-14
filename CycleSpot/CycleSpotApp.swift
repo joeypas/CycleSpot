@@ -29,9 +29,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct CycleSpotApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @StateObject private var rackView = BikeRackView()
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(rackView)
         }
     }
 }

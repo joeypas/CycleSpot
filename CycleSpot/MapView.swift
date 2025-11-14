@@ -10,16 +10,15 @@ import MapKit
 import OSLog
 
 struct MapView: View {
-    // List of bike racks Eventually we will need to asynchronysly fetch this data and populate the list
-    @State private var racks: [MKMapItem] = []
     // Currently Selected Item
     @State private var selectedItem: MKMapItem?
     // Position that the map is looking at
     @State private var cameraPosition: MapCameraPosition = .automatic
     // Route, Null if we aren't using it
     @State private var mapRoute: MKRoute?
-    @State private var searchText: String = ""
-    @StateObject private var rackView = BikeRackView()
+    @EnvironmentObject var rackView: BikeRackView
+    @State private var searchText = ""
+    var initialSearch: String = ""
     
     private let locationManager = CLLocationManager()
     private let logger = Logger(subsystem: "com.cyclespot", category: "MapView")
@@ -57,7 +56,8 @@ struct MapView: View {
                     if !searchText.isEmpty {
                         Button(action: {
                             searchText = ""
-                            racks.removeAll()
+                            rackView.racks.removeAll()
+                            cameraPosition = .userLocation(fallback: .automatic)
                         }) {
                             Image(systemName: "xmark.circle.fill")
                                 .foregroundStyle(.gray)
@@ -74,47 +74,23 @@ struct MapView: View {
             }
             
         }
-        
-        
-        
-        // Callback for when an item is selected
-        .onChange(of: selectedItem) {
-            if let selectedItem {
-                // Get directions from current location to selected map item
-                let request = MKDirections.Request()
-                request.source = MKMapItem.forCurrentLocation()
-                request.destination = selectedItem
-                request.transportType = .walking
-                let directions = MKDirections(request: request)
-                directions.calculate { response, error in
-                    guard let response else {
-                        // Just for testing
-                        let logger = Logger()
-                        logger.error("Error calculating directions: \(error!)")
-                        return
-                    }
-                    if let route = response.routes.first {
-                        mapRoute = route
-                    }
-                }
-            } else {
-                mapRoute = nil
-            }
-        }
         .onAppear {
             locationManager.requestWhenInUseAuthorization()
             cameraPosition = .userLocation(fallback: .automatic)
-            rackView.fetchRacks()
+            rackView.fetchRacks{
+                if !initialSearch.isEmpty {
+                    searchText = initialSearch
+                    performSearch()
+                }
+            }
         }
     }
-    
     
     private func performSearch() {
         guard !searchText.isEmpty else { return }
         
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = searchText
-        request.region = MKCoordinateRegion(.world) // you can limit region later if you want
         
         let search = MKLocalSearch(request: request)
         search.start { response, error in
@@ -123,30 +99,22 @@ struct MapView: View {
                 return
             }
             
-            if let items = response?.mapItems {
-                racks = items
-                if let first = items.first {
-                    cameraPosition = .userLocation(fallback: .region(MKCoordinateRegion(center: first.placemark.coordinate, span: MKCoordinateSpan(latitudeDelta: 44.475695, longitudeDelta: -122.406417))))
-                }
-            }
-        }
-    }
-    
-    private func getDirections(to destination: MKMapItem) {
-        let request = MKDirections.Request()
-        request.source = MKMapItem.forCurrentLocation()
-        request.destination = destination
-        request.transportType = .walking
-        
-        let directions = MKDirections(request: request)
-        directions.calculate { response, error in
-            if let error = error {
-                logger.error("Error calculating directions: \(error.localizedDescription)")
-                return
-            }
+            guard let items = response?.mapItems, let first = items.first else { return }
             
-            if let route = response?.routes.first {
-                mapRoute = route
+            cameraPosition = .region(
+                MKCoordinateRegion(
+                    center: first.placemark.coordinate,
+                    span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
+                )
+            )
+            
+            let searchedLocation = CLLocation(latitude: first.placemark.coordinate.latitude,
+                                              longitude: first.placemark.coordinate.longitude)
+            let radiusInMeters = 400.00
+            
+            rackView.racks = rackView.allRacks.filter { rack in
+                let rackLocation = CLLocation(latitude: rack.latitude, longitude: rack.longitude)
+                return rackLocation.distance(from: searchedLocation) <= radiusInMeters
             }
         }
     }
