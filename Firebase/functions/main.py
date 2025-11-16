@@ -11,7 +11,7 @@ from firebase_admin import credentials
 import requests
 import logging
 
-cred = credentials.Certificate("./cyclespot-dc104-firebase-adminsdk-fbsvc-8c3f50af56.json")
+cred = credentials.Certificate("./cyclespot-dc104-firebase-adminsdk-fbsvc-9eda8d6a15.json")
 
 # For cost control, you can set the maximum number of containers that can be
 # running at the same time. This helps mitigate the impact of unexpected
@@ -36,7 +36,7 @@ params = {
 }
 
 # UVM bikes data
-uvm_rack_url = "https://services1.arcgis.com/1bO0c7PxQdsGidPK/ArcGIS/rest/services/UVM_Bicycle_Parking/FeatureServer/0/query"
+# https://services1.arcgis.com/1bO0c7PxQdsGidPK/ArcGIS/rest/services/UVM_Bicycle_Parking/FeatureServer/0/query
 
 # Turn the json data we recieve into a dict with only the fields that we want
 def extract_fields(feature):
@@ -82,5 +82,6 @@ def update_racks(_: scheduler_fn.ScheduledEvent) -> None:
         # We got an error, so log it and fail
         logging.error("Update Racks failed: {}".format(e.__str__()))
         raise(e)
+
 
 

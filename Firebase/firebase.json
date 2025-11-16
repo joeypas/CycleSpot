@@ -1,8 +1,7 @@
 {
   "functions": [
     {
-      "source": "functions/v2",
-      "codebase": "v2",
+      "codebase": "default",
       "disallowLegacyRuntimeConfig": true,
       "ignore": [
         "venv",
@@ -11,8 +10,24 @@
         "firebase-debug.*.log",
         "*.local"
       ],
+      "source": "functions",
       "runtime": "python313"
     },
+    {
+      "source": "javascript",
+      "codebase": "javascript",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
+    }
   ],
   "emulators": {
     "functions": {
