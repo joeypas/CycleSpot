@@ -19,6 +19,8 @@ struct MapView: View {
     @EnvironmentObject var rackView: BikeRackView
     @State private var searchText = ""
     var initialSearch: String = ""
+    @State private var selectedRack: BikeRack?
+    
     
     private let locationManager = CLLocationManager()
     private let logger = Logger(subsystem: "com.cyclespot", category: "MapView")
@@ -29,12 +31,18 @@ struct MapView: View {
                 UserAnnotation()
                 ForEach(rackView.racks) { rack in
                     // Create a marker for each rack
-                    Marker(rack.address, coordinate: rack.coordinate)
-                        .tint(Color.blue)
+                    Annotation(rack.address, coordinate: rack.coordinate) {
+                        Image(systemName: "mappin.circle.fill")
+                            .font(.title)
+                            .foregroundStyle(.blue)
+                            .onTapGesture {
+                                selectedRack = rack
+                            }
+                    }
                 }
                 if let mapRoute {
                     // If we have a route display it
-                    MapPolyline(mapRoute)
+                MapPolyline(mapRoute)
                         .stroke(Color.blue, lineWidth: 5)
                 }
             }
@@ -83,6 +91,9 @@ struct MapView: View {
                     performSearch()
                 }
             }
+        }
+        .sheet(item: $selectedRack) { rack in
+            RackDetailView(rack: rack)
         }
     }
     
