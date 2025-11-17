@@ -12,21 +12,6 @@
       ],
       "source": "functions",
       "runtime": "python313"
-    },
-    {
-      "source": "javascript",
-      "codebase": "javascript",
-      "disallowLegacyRuntimeConfig": true,
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local"
-      ],
-      "predeploy": [
-        "npm --prefix \"$RESOURCE_DIR\" run lint"
-      ]
     }
   ],
   "emulators": {
@@ -39,6 +24,15 @@
     "ui": {
       "enabled": true
     },
-    "singleProjectMode": true
+    "singleProjectMode": true,
+    "pubsub": {
+      "port": 8085
+    },
+    "auth": {
+      "port": 9099
+    },
+    "tasks": {
+      "port": 9499
+    }
   }
 }
