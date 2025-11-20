@@ -9,19 +9,21 @@ import SwiftUI
 import PhotosUI
 
 struct SettingsView: View {
-
+    
+    @State var user: UserProfile? = nil
     @State private var selectedPhoto: PhotosPickerItem?
-    @State private var profileImage: Image? = nil
+    @State var profileImage: Image? = nil
     @State private var notificationsEnabled = true
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
+                    if let user = user {
 
                     // Profile Section
                     VStack(spacing: 12) {
-
+                        
                         // Profile Image (placeholder or picked)
                         if let profileImage = profileImage {
                             profileImage
@@ -40,11 +42,11 @@ struct SettingsView: View {
                                 .shadow(radius: 3)
                                 .padding(.top, 20)
                         }
-
-                        Text("Username1")
+                        
+                        Text(user.displayname)
                             .font(.title2)
                             .fontWeight(.semibold)
-
+                        
                         // Photo Picker Button
                         PhotosPicker(
                             selection: $selectedPhoto,
@@ -58,14 +60,14 @@ struct SettingsView: View {
                             loadImage(item: newItem)
                         }
                     }
-
+                    
                     Divider()
-
+                    
                     // Badges Section
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Badges")
                             .font(.headline)
-
+                        
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 16) {
                                 ForEach(fakeBadges, id: \.self) { badge in
@@ -74,7 +76,7 @@ struct SettingsView: View {
                                             .font(.largeTitle)
                                             .foregroundStyle(badge.color)
                                             .padding()
-
+                                        
                                         Text(badge.name)
                                             .font(.caption)
                                     }
@@ -83,7 +85,9 @@ struct SettingsView: View {
                             .padding(.horizontal)
                         }
                     }
-
+                    
+                }
+                    
                     Divider()
 
                     // --- NEW: App Settings Row ---
@@ -102,7 +106,7 @@ struct SettingsView: View {
                     // Old Sign Out removed (now inside AppSettingsScreen)
                 }
             }
-            .navigationTitle("Profile")
+            .navigationTitle("Settings")
         }
     }
 
@@ -184,5 +188,6 @@ struct AppSettingsScreen: View {
 }
 
 #Preview {
+    //SettingsView(user: UserProfile(id: "test", displayname: "Username1"))
     SettingsView()
 }

@@ -7,32 +7,39 @@
 
 import SwiftUI
 import FirebaseAuth
+import FirebaseFirestore
 
 class LoginViewModel: ObservableObject {
-    @Published var user: User? = nil
+    @Published var user_handle: User? = nil
     @Published var isSignedIn: Bool = false
+    @Published var user_profile: UserProfile? = nil
     
     init() {
-        self.user = Auth.auth().currentUser
-        self.isSignedIn = user != nil
+        self.user_handle = Auth.auth().currentUser
+        self.isSignedIn = user_handle != nil
     }
     
-    func signUp(email: String, password: String) {
+    func signUp(email: String,  password: String) {
+        let db = Firestore.firestore()
         Auth.auth().createUser(withEmail: email, password: password) { result, error in
             if let error = error {
+                print(error)
                 return
             }
-            self.user = result?.user
+            
+            self.user_handle = result?.user
             self.isSignedIn = true
+            
         }
     }
     
     func signIn(email: String, password: String) {
         Auth.auth().signIn(withEmail: email, password: password) {result, error in
             if let error = error {
+                print(error)
                 return
             }
-            self.user = result?.user
+            self.user_handle = result?.user
             self.isSignedIn = true
         }
     }
@@ -40,7 +47,7 @@ class LoginViewModel: ObservableObject {
     func signOut() {
         do {
             try Auth.auth().signOut()
-            self.user = nil
+            self.user_handle = nil
             self.isSignedIn = false
         } catch {
             return
