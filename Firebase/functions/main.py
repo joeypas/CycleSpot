@@ -46,7 +46,7 @@ def extract_fields_uvm(feature):
 
     return {
         "ID": "UVM_" + str(attrs.get("FID")),
-        "Address": "UVM",
+        "Address": None,
         "Capacity": capacity,
         "Covered": (covered == "YES"),
         "Features": None,
